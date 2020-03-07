@@ -57,7 +57,6 @@ userSchema.methods = {
         }
     }
 
-}
+};
 
-const User = mongoose.model('Issue', userSchema);
-module.exports = User; 
+module.exports = mongoose.model('User', userSchema);

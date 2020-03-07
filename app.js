@@ -27,6 +27,7 @@ mongoose.connection.on('error', err => {
 
 //ROUTES
 const postRoutes = require('./routes/post');
+const authRoutes = require ('./routes/auth');
  /* we use it as a middleware, any request on '/' will be 
  passed to the postRoutes who will give it to the  controller*/
 
@@ -35,6 +36,7 @@ app.use(morgan('dev'));  // in dev mode you gonna see what happens :)
 app.use(bodyParser.json());
 app.use(expressValidator());
 app.use('/',postRoutes);
+app.use ('/', authRoutes);
 
 const port=8000;
 
