@@ -1,12 +1,16 @@
 const Post = require('../models/post');
 
+
+// TO GET ALL THE POSTS FROM THE DATABASE
+
 exports.getPosts = (req,res)=> {
-    res.json({
-        posts: [
-            {title: 'Any post'},
-            {title: 'Any other post'}
-        ]
-    });
+    const posts = Post.find()  // it will find and give all the posts normally
+    .then((posts)=> {
+        res.json({
+            posts: posts // the key and value have the same name we could only keep posts if we wanna be modern
+        });
+    })
+    .catch(err);
 };
 
 // to create a new post
