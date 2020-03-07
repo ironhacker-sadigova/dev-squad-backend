@@ -8,13 +8,15 @@ const morgan = require('morgan');
 /* => npm morgan : Morgan acts as a middleware and helps to see in the console the routes paths: 
 from which route we are getting the request*/
 const bodyParser = require('body-parser');
+const expressValidator = require('express-validator');
 const dotenv = require('dotenv');
 dotenv.config();
 
 // CONNECTING TO MDB
 mongoose.connect(
   process.env.MONGO_URI,
-  {useNewUrlParser: true}
+  { useNewUrlParser: true,
+    useUnifiedTopology: true}
 )
 .then(() => console.log('Successfuly Connected to the Database'))
  
@@ -31,7 +33,9 @@ const postRoutes = require('./routes/post');
  //MIDDLEWARES EXECUTING IN THE MIDDLE
 app.use(morgan('dev'));  // in dev mode you gonna see what happens :) 
 app.use(bodyParser.json());
+app.use(expressValidator());
 app.use('/',postRoutes);
+
 const port=8000;
 
 app.listen(port,()=> {
