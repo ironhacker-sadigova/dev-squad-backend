@@ -1,14 +1,13 @@
 /* Note for myself : 
 if Console.log (“PROCESS: “, process) it throws   
 the entire application running in the process */
-
-
 const express = require ('express');
 const app = express();
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 const morgan = require('morgan'); 
 /* => npm morgan : Morgan acts as a middleware and helps to see in the console the routes paths: 
 from which route we are getting the request*/
+const bodyParser = require('body-parser');
 const dotenv = require('dotenv');
 dotenv.config();
 
@@ -28,11 +27,11 @@ mongoose.connection.on('error', err => {
 const postRoutes = require('./routes/post');
  /* we use it as a middleware, any request on '/' will be 
  passed to the postRoutes who will give it to the  controller*/
-//MIDDLEWARES EXECUTING IN THE MIDDLE
 
+ //MIDDLEWARES EXECUTING IN THE MIDDLE
 app.use(morgan('dev'));  // in dev mode you gonna see what happens :) 
+app.use(bodyParser.json());
 app.use('/',postRoutes);
-
 const port=8000;
 
 app.listen(port,()=> {
