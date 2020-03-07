@@ -10,7 +10,7 @@ exports.getPosts = (req,res)=> {
             posts: posts // the key and value have the same name we could only keep posts if we wanna be modern
         });
     })
-    .catch(err);
+    .catch(err=> console.log(error));
 };
 
 // to create a new post
