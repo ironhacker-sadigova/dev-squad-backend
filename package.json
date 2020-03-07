@@ -1,0 +1,27 @@
+{
+  "name": "dev-squad-backend",
+  "version": "1.0.0",
+  "description": "A node Js API",
+  "main": "app.js",
+  "scripts": {
+    "dev": "nodemon app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ironhacker-sadigova/dev-squad-backend.git"
+  },
+  "keywords": [
+    "node",
+    "api"
+  ],
+  "author": "Sadigova Farida",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ironhacker-sadigova/dev-squad-backend/issues"
+  },
+  "homepage": "https://github.com/ironhacker-sadigova/dev-squad-backend#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "nodemon": "^2.0.2"
+  }
+}
