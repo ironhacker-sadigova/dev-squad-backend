@@ -45,6 +45,11 @@ userSchema.virtual('password') // in order to have non peristent data :) and sav
 // Encrypted password Method to do the hashing
 
 userSchema.methods = {
+    authenticate: function(userInput){
+            return this.encryptPassword(userInput) === this.hashed_Password;
+
+        }, // so the user will be authenticated only if his input matches with the hashed password
+
     encryptPassword: function(password) {
         if (!password) return "";
         try {  // if successfull

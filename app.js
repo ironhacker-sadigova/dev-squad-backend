@@ -9,6 +9,8 @@ const morgan = require('morgan');
 from which route we are getting the request*/
 const bodyParser = require('body-parser');
 const expressValidator = require('express-validator');
+const cookieParser = require('cookie-parser')
+
 const dotenv = require('dotenv');
 dotenv.config();
 
@@ -35,6 +37,7 @@ const authRoutes = require ('./routes/auth');
 app.use(morgan('dev'));  // in dev mode you gonna see what happens :) 
 app.use(bodyParser.json());
 app.use(expressValidator());
+app.use(cookieParser());
 app.use('/',postRoutes);
 app.use ('/', authRoutes);
 
