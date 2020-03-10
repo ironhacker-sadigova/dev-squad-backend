@@ -7,6 +7,10 @@ the app contacts Facebook’s Authentication server with the user’s credential
 Once the Authentication server verifies the user’s credentials,
 it will create a JWT and sends it to the user. The app now gets this JWT 
 and allows the user access to its data.*/
+const expressjwt = require('express-jwt');
+
+//express-jwt helps to protect routes : if the user is logged in and has a valid json token
+
 
 require('dotenv').config(); // because I will need to import some var from the dotenv.
 const User = require ('../models/user');
@@ -64,6 +68,17 @@ exports.signout = (req,res) => {
     res.clearCookie('cok');
     return res.status(200);
 };
-    
- 
 
+// when the user tries to access some routes, will be possible only if signed in
+// I can use this method in any of my routes and apply it as a middleware
+ exports.signinRequire = expressjwt({
+     secret: process.env.JWT_SECRET
+ });
+
+ /*
+When user tries to access the  protected routes ( pages) server expects 
+our client app to send the secret ( JWT_SECRET ) that we have saved in .env file 
+and this secret will be checked with the Tocken  which is stored in browser's local storage 
+ as cookie when user is logged in (tocken = user_id + JWT_SECRET ) . 
+If both the secret key are matched then user will get an access to pages
+ */
