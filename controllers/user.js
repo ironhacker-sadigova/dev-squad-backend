@@ -43,3 +43,10 @@ res.json({ users });
 }).select('name email updated created'); // it will show only those user info
 
 };
+
+// return the profile object from the request url thats enough to show the user
+exports.getSingleUser = (req, res) => {
+    req.profile.hashed_password = undefined;
+    req.profile.salt = undefined;
+    return res.json (req.profile);
+};
