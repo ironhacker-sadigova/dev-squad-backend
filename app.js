@@ -42,6 +42,15 @@ app.use(cookieParser());
 app.use('/',postRoutes);
 app.use ('/', authRoutes);
 
+//Error handling whenever trying to access to a route not being authenticated , code snippet on npm doc jwt express
+app.use(function (err, req, res, next) {
+  if (err.name === 'UnauthorizedError') {
+    res.status(401).send('invalid token...');
+  }
+});
+
+
+// Inutile d'écrire ça vu que je l'ai sur l'.env but better to see on which port its running straight from the terminal
 const port=8000;
 
 app.listen(port,()=> {

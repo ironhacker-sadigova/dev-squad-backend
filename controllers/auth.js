@@ -72,7 +72,8 @@ exports.signout = (req,res) => {
 // when the user tries to access some routes, will be possible only if signed in
 // I can use this method in any of my routes and apply it as a middleware
  exports.signinRequire = expressjwt({
-     secret: process.env.JWT_SECRET
+     secret: process.env.JWT_SECRET,
+     userProperty: 'auth' // so that we know the user is authenticated 
  });
 
  /*
@@ -82,3 +83,6 @@ and this secret will be checked with the Tocken  which is stored in browser's lo
  as cookie when user is logged in (tocken = user_id + JWT_SECRET ) . 
 If both the secret key are matched then user will get an access to pages
  */
+
+
+ 
