@@ -33,6 +33,11 @@ const postRoutes = require('./routes/post');
 const authRoutes = require ('./routes/auth');
  /* we use it as a middleware, any request on '/' will be 
  passed to the postRoutes who will give it to the  controller*/
+const userRoutes = require ('./routes/user');
+
+
+
+
 
  //MIDDLEWARES EXECUTING IN THE MIDDLE
 app.use(morgan('dev'));  // in dev mode you gonna see what happens :) 
@@ -41,6 +46,7 @@ app.use(expressValidator());
 app.use(cookieParser());
 app.use('/',postRoutes);
 app.use ('/', authRoutes);
+app.use ('/', userRoutes);
 
 //Error handling whenever trying to access to a route not being authenticated , code snippet on npm doc jwt express
 app.use(function (err, req, res, next) {

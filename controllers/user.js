@@ -29,3 +29,17 @@ exports.AuthorizedUser = (req, res, next)=> {
         });
     }
 };
+
+exports.showAllUsers = (req,res) => {
+    User.find((err, users) => {
+    if (err) { 
+        return res.status(400).json({
+            error: err
+
+        });
+    }
+res.json({ users });
+    
+}).select('name email updated created'); // it will show only those user info
+
+};
