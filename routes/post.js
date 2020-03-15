@@ -9,7 +9,7 @@ const router = express.Router(); // to have access to the express Router
 
 
 router.get('/',postController.getPosts);
-router.post('/post',signinRequire, validator.createPostValidator,postController.createPost); // to create a new post user should be signed in
+router.post('/post/nex/:userID',signinRequire, validator.createPostValidator,postController.createPost); // to create a new post user should be signed in
 
 router.param('userID', userById );
  // Making a query to the DB & getting userInfo & appending to the user object
