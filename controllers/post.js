@@ -1,6 +1,7 @@
 const Post = require('../models/post');
 const Formidable = require ('formidable'); // its a package to handle files , we can also use multer package 
 const FileSystem = require ('fs');
+const _   = require ('lodash'); //we will use it to edit & update posts
 
 
 // TO GET ALL THE POSTS FROM THE DATABASE
@@ -97,7 +98,7 @@ exports.postById = (req, res, next, id) => {
 
 // CHECKING IF THE POST IS THE ONE OF THE USER
 exports.isPostOwner = (req,res,next)=> {
-    let isPostOwner = req.post && req.auth && req.post.postedBy._id === req.auth._id
+    let isPostOwner = req.post && req.auth && req.post.postedBy._id == req.auth._id
     if (!isPostOwner){
         return res.status(400).json({
             error: 'You can not perform this action, you are not the owner'
@@ -122,4 +123,23 @@ exports.deletePost = (req,res)=> {
             message: 'Your post has been deleted.'
         });
     });
+};
+
+
+// EDIT POST
+
+exports.editPost =(req, res, next)=> {
+    let post = req.post
+        post = _.extend(post, req.body) //lodash method
+        post.updated = Date.now()
+        post.save(err => 
+            {
+                if (err){
+                    return res.status(400).json({
+                        error:err
+                    });
+                }
+                res.json(post);
+            });
+
 };
