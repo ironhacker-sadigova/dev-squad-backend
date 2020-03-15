@@ -9,7 +9,9 @@ const morgan = require('morgan');
 from which route we are getting the request*/
 const bodyParser = require('body-parser');
 const expressValidator = require('express-validator');
-const cookieParser = require('cookie-parser')
+const cookieParser = require('cookie-parser');
+const FileSystem = require('fs');
+const cors = require ('cors');
 
 
 const dotenv = require('dotenv');
@@ -35,6 +37,22 @@ const authRoutes = require ('./routes/auth');
  passed to the postRoutes who will give it to the  controller*/
 const userRoutes = require ('./routes/user');
 
+//ApiDocs
+
+app.get ('/', (req,res)=> {
+  FileSystem.readFile('docs/api.json', (err,data)=>{
+    if (err){
+      res.status(400).json({
+        error:err
+      });
+  }
+const docs = JSON.parse(data);
+res.json(docs);
+   
+});
+
+});
+
 
 
 
@@ -44,6 +62,7 @@ app.use(morgan('dev'));  // in dev mode you gonna see what happens :)
 app.use(bodyParser.json());
 app.use(expressValidator());
 app.use(cookieParser());
+app.use (cors());
 app.use('/',postRoutes);
 app.use ('/', authRoutes);
 app.use ('/', userRoutes);

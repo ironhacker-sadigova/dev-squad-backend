@@ -8,7 +8,7 @@ const router = express.Router(); // to have access to the express Router
 
 
 
-router.get('/',getPosts);
+router.get('/posts',getPosts);
 router.post('/post/new/:userID',signinRequire,createPost, validator.createPostValidator); // to create a new post user should be signed in
 router.get('/posts/by/user:Id',signinRequire, allpostsByUser);
 router.put('/post/:postId', signinRequire, isPostOwner, editPost);
