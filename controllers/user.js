@@ -4,6 +4,7 @@ const User = require  ('../models/user');
 
 
 
+
 exports.userById = (req, res, next, id) => {
 
     User.findById(id).exec((err, user)=>
@@ -79,7 +80,7 @@ exports.updateUser = (req, res, next)=> {
 
 exports.deleteUser = (req,res,next)=> {
     let user = req.profile;
-    user.remove((err,deletedUser)=>{
+    user.remove((err, deletedUser)=>{
         if (err) {
             return res.status(400).json({
                 error:err

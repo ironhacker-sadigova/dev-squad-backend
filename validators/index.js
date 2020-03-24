@@ -39,7 +39,7 @@ exports.createPostValidator = (req,res,next) => {
     // checking if password
     req.check('password', 'Password is required').notEmpty()
     req.check('password')
-    .isLength({min:7})
+    .isLength({min:5})
     .withMessage('Your password must contain at least 7 characters')
     .matches(/\d/) // stands for digits
     .withMessage('Your password must contain a number');

@@ -14,14 +14,15 @@ const expressjwt = require('express-jwt');
 
 require('dotenv').config(); // because I will need to import some var from the dotenv.
 const User = require ('../models/user');
+const _= require('lodash');
 
 
 exports.signup = async (req, res) => {
     const existingUser = await User.findOne({
-        email: req.body.email}) // we will check based on the email if exists
+        email: req.body.email}); // we will check based on the email if exists
         if (existingUser) return res.status(403).json({
             error: " Oops...Already existing email ..."
-        })()
+        });
         const user = await new User(req.body)
         await user.save(),
         res.status(200).json({message:'Successfully signed up, time to login'});
@@ -32,8 +33,8 @@ exports.signin = (req, res) => {
     const {email,password} = req.body;
     
     User.findOne({email},(err,user) => {
-    if(err && !user) {
-        return res.status(404).json({
+    if(err || !user) {
+        return res.status(401).json({
             error: 'Inexisting account. Please try again'
         });
     }    
