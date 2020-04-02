@@ -1,18 +1,24 @@
-const express = require('express');
-const { userById, showAllUsers, getSingleUser, updateUser, deleteUser } = require ('../controllers/user');
-const { signinRequire } = require("../controllers/auth");
-
-
-const router = express.Router(); // to have access to the express Router
 
 
 
-router.get ('/users', showAllUsers);
-router.get ('/user/:userId', signinRequire, getSingleUser); // you must be loged in to see the selected user
-router.put ('/user/:userId', signinRequire, updateUser); // put is to make changes & update :))
-router.delete('/user/:userId', signinRequire, deleteUser); // put is to make changes & update :))
+const express = require("express");
+const {
+    userById,
+    allUsers,
+    getUser,
+    updateUser,
+    deleteUser
+} = require("../controllers/user");
+const { requireSignin } = require("../controllers/auth");
 
+const router = express.Router();
 
-router.param('userId', userById);
+router.get("/users", allUsers);
+router.get("/user/:userId", requireSignin, getUser); // you must be loged in to see the selected user
+router.put("/user/:userId", requireSignin, updateUser); // put is to make changes & update :))
+router.delete("/user/:userId", requireSignin, deleteUser);
+
+// any route containing :userId, our app will first execute userByID()
+router.param("userId", userById);
 
 module.exports = router;

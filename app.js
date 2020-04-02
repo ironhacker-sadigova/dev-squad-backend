@@ -1,13 +1,17 @@
+
+
+
+
 /* Note for myself : 
 if Console.log (“PROCESS: “, process) it throws   
 the entire application running in the process */
-const express = require ('express');
+/*const express = require ('express');
 const app = express();
 const mongoose = require('mongoose');
 const morgan = require('morgan'); 
 /* => npm morgan : Morgan acts as a middleware and helps to see in the console the routes paths: 
 from which route we are getting the request*/
-const bodyParser = require('body-parser');
+/*const bodyParser = require('body-parser');
 const expressValidator = require('express-validator');
 const cookieParser = require('cookie-parser');
 const FileSystem = require('fs');
@@ -35,7 +39,7 @@ const postRoutes = require('./routes/post');
 const authRoutes = require ('./routes/auth');
  /* we use it as a middleware, any request on '/' will be 
  passed to the postRoutes who will give it to the  controller*/
-const userRoutes = require ('./routes/user');
+/*const userRoutes = require ('./routes/user');
 
 //ApiDocs
 
@@ -82,3 +86,85 @@ app.listen(port,()=> {
     console.log (`The Api is listening on port: ${port}`);
 });
 
+*/
+
+
+const express = require("express");
+const app = express();
+const mongoose = require("mongoose");
+const morgan = require("morgan");
+const bodyParser = require("body-parser");
+var cookieParser = require("cookie-parser");
+const expressValidator = require("express-validator");
+const fs = require("fs");
+const cors = require("cors");
+const dotenv = require("dotenv");
+dotenv.config();
+
+// db
+
+/*mongoose
+    .connect(
+        process.env.MONGO_URI,
+        { useNewUrlParser: true }
+    )
+    .then(() => console.log("DB Connected"));
+
+mongoose.connection.on("error", err => {
+    console.log(`DB connection error: ${err.message}`);
+});
+*/
+mongoose.connect(
+  process.env.MONGO_URI,
+  { useNewUrlParser: true,
+    useUnifiedTopology: true}
+)
+.then(() => console.log('Successfuly Connected to the Database'))
+ 
+mongoose.connection.on('error', err => {
+  console.log(`DB connection error: ${err.message}`)
+});
+
+
+
+// bring in routes
+const postRoutes = require("./routes/post");
+const authRoutes = require("./routes/auth");
+const userRoutes = require("./routes/user");
+// apiDocs
+app.get("/", (req, res) => {
+    fs.readFile("docs/apiDocs.json", (err, data) => {
+        if (err) {
+            res.status(400).json({
+                error: err
+            });
+        }
+        const docs = JSON.parse(data);
+        res.json(docs);
+    });
+});
+
+// middleware
+app.use(morgan("dev"));
+app.use(bodyParser.json());
+app.use(cookieParser());
+app.use(expressValidator());
+app.use(cors());
+app.use("/", postRoutes);
+app.use("/", authRoutes);
+app.use("/", userRoutes);
+app.use(function(err, req, res, next) {
+    if (err.name === "UnauthorizedError") {
+        res.status(401).json({ error: "Unauthorized!" });
+    }
+});
+
+app.use((req, res, next) => {
+  // If no routes match, send them the React HTML.
+  res.sendFile(__dirname + "/public/index.html");
+});
+
+const port = process.env.PORT || 8000;
+app.listen(port, () => {
+    console.log(`A Node Js API is listening on port: ${port}`);
+});
