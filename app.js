@@ -98,8 +98,10 @@ var cookieParser = require("cookie-parser");
 const expressValidator = require("express-validator");
 const fs = require("fs");
 const cors = require("cors");
+const path = require('path'); 
 const dotenv = require("dotenv");
 dotenv.config();
+
 
 // db
 
@@ -153,10 +155,14 @@ app.use(cors());
 app.use("/", postRoutes);
 app.use("/", authRoutes);
 app.use("/", userRoutes);
+/// Serve static files from client/build
+app.use(express.static(path.join(__dirname, "public/build")));
+// For any other routes: serve public/build/index.html SPA
 app.use((req, res, next) => {
-  // If no routes match, send them the React HTML.
-  res.sendFile(__dirname + "/public/index.html");
-});
+  res.sendFile(`${__dirname}/public/build/index.html`), err => {
+    if (err) { next(err) }
+  }
+})
 app.use(function(err, req, res, next) {
     if (err.name === "UnauthorizedError") {
         res.status(401).json({ error: "Unauthorized!" });
