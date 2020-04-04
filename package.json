@@ -4,7 +4,8 @@
   "description": "A Node Js API",
   "main": "app.js",
   "scripts": {
-    "dev": "nodemon app.js"
+    "start": "node ./bin/www",
+    "dev": "DEBUG=nomdetonprojet:* nodemon ./bin/www"
   },
   "keywords": [
     "node",
