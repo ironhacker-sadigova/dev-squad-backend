@@ -25,15 +25,21 @@ const userSchema = new mongoose.Schema({
         type: Date,
         default: Date.now  //no now() because with mongoose we can't
     },
-    updated: Date
+    updated: Date,
+    photo: {
+        data: Buffer,
+        contentType: String 
+
+        /*populate the photo we will have these
+         two fields one will with the actual data that will
+come in a binary format.*/
+    },
+    about:{
+        type:String,
+        trim: true
+    }
 });
 
-/**
- * Virtual fields are additional fields for a given model.
- * Their values can be set manually or automatically with defined functionality.
- * Keep in mind: virtual properties (password) don’t get persisted in the database.
- * They only exist logically and are not written to the document’s collection.
- */
 
 // virtual field
 userSchema

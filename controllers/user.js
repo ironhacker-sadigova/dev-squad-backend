@@ -50,7 +50,7 @@ exports.getUser = (req, res) => {
 
 // USER PROFILE UPDATE METHOD
 
-exports.updateUser = (req, res, next) => {
+/*exports.updateUser = (req, res, next) => {
     let form = new formidable.IncomingForm(); 
     form.keepExtensions = true;
     form.parse(req, (err, fields, files) => {
@@ -85,7 +85,53 @@ exports.updateUser = (req, res, next) => {
     });
 };
 
+*/
 
+exports.updateUser = (req, res, next) => {
+    let form = new formidable.IncomingForm(); // will handle the form request 
+    form.keepExtensions = true;// to keep the extension
+    form.parse(req, (err, fields, files) => { // we give 2 argumentd to this method with the data comming & how to handle it with a callback funct
+        if (err) {
+            return res.status(400).json({
+                error: 'Fail to upload your photo'
+            });
+        }
+        // save the user
+        let user = req.profile;
+    
+    user = _.extend(user, fields); // LODASH METHOD :) 
+
+        user.updated = Date.now();
+
+        console.log(user);
+
+        if (files.photo) { // IF THERES IS A PHOTO , WE ADD IT TO THE MODEL PHOTO 
+            user.photo.data = fs.readFileSync(files.photo.path);
+            user.photo.contentType = files.photo.type;
+        }
+// NOW WE SAVE THE USER 
+
+        user.save((err, result) => {
+            if (err) {
+                return res.status(400).json({
+                    error: err
+                });
+            }
+            user.hashed_password = undefined;
+            user.salt = undefined;
+            res.json(user);
+        });
+    });
+};
+
+exports.userPhoto = (req, res, next) => {
+    if (req.profile.photo.data) {
+// IF THE CASE MEANS THE USER UPLOADED THEIR PHOTOS 
+        res.set(('Content-Type', req.profile.photo.contentType));
+        return res.send(req.profile.photo.data);
+    }
+    next();
+};
 
 // DELETE USER
 
