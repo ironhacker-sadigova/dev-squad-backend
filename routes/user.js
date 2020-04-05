@@ -9,11 +9,21 @@ const {
     updateUser,
     deleteUser,
     userPhoto,
+    addFollowing,
+    addFollower,
+    removeFollower,
+    removeFollowing
    
 } = require("../controllers/user");
 const { requireSignin } = require("../controllers/auth");
 
 const router = express.Router();
+
+router.put('/user/follow', requireSignin, addFollower, addFollowing);// WE NEED TO HANDLE THE FOLLOW AND UNFOLLOW 
+// TWO TYPES OF USERS NEED TO HANDLE
+// FOLLOWING LIST AND UNFOLLOWING LIST
+// TWO LIST TO MAINTAIN
+router.put('user/unfollow',requireSignin, removeFollowing, removeFollower)
 
 router.get("/users", allUsers);
 router.get("/user/:userId", requireSignin, getUser); // you must be loged in to see the selected user

@@ -4,6 +4,7 @@
 const mongoose = require("mongoose");
 const uuidv1 = require("uuid/v1");
 const crypto = require("crypto");
+const {ObjectId} = mongoose. Schema
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -37,7 +38,14 @@ come in a binary format.*/
     about:{
         type:String,
         trim: true
-    }
+    },
+
+    following: [{type: ObjectId, // part of mongoose
+        ref: "User"}] ,
+    followers: [{type: ObjectId, ref:"User"}]
+// NEED TO UPDATE THE userByID controller method to populate the returned user object with ofllowers & following
+//
+    
 });
 
 

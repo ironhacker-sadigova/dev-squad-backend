@@ -4,7 +4,12 @@ const formidable = require("formidable");
 const fs = require("fs");
 
 exports.userById = (req, res, next, id) => {
-    User.findById(id).exec((err, user) => {
+    User.findById(id)
+    // WE NEED TO POPULATE THE ARRAY IN THE FOLLOWING FIELD OF THE USER MODEL 
+    .populate('following', '_id name')
+    .populate('followers', '_id name')
+
+    .exec((err, user) => {
         if (err || !user) {
             return res.status(400).json({
                 error: "User not found"
@@ -148,7 +153,66 @@ exports.deleteUser = (req, res, next) => {
     });
 };
 
+// METHOD FOLLOW AND UNFOLLOW 
+
+exports.addFollowing = (req, res, next) => {
+    User.findByIdAndUpdate(req.body.userId, { $push: { following: req.body.followId } }, (err, result) => {
+        if (err) {
+            return res.status(400).json({ error: err });
+        }
+        next();
+    });
+};
+
+exports.addFollower = (req, res) => {
+    User.findByIdAndUpdate(req.body.followId, { $push: { followers: req.body.userId } }, 
+        { new: true }) // THAT MANGO DB DOESN'T THROW OLD DATA 
+        .populate('following', '_id name')
+        .populate('followers', '_id name')
+        .exec((err, result) => {
+            if (err) {
+                return res.status(400).json({
+                    error: err
+                });
+            }
+            result.hashed_password = undefined;
+            result.salt = undefined;
+            res.json(result);
+        });
+};
 
 
 
+// REMOVE FOLLOW AND FOLLIWING METHOD 
+/////////////////////////////////////////
+//SIMILAR TO ADD 
 
+
+exports.removeFollowing = (req, res, next) => {
+    User.findByIdAndUpdate(req.body.userId, 
+        { $pull: { following: req.body.unfollowId } },
+         (err, result) => {
+        if (err) {
+            return res.status(400).json({ error: err });
+        }
+        next();
+    });
+};
+
+exports.removeFollower = (req, res) => {
+    User.findByIdAndUpdate(req.body.unfollowId,
+         { $pull: { followers: req.body.userId } },
+          { new: true }) // MONGO DB TO SHOW RECENT DATA
+        .populate('following', '_id name')
+        .populate('followers', '_id name')
+        .exec((err, result) => {
+            if (err) {
+                return res.status(400).json({
+                    error: err
+                });
+            }
+            result.hashed_password = undefined;
+            result.salt = undefined;
+            res.json(result);
+        });
+};
