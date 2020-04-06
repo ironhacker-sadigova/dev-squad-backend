@@ -1,15 +1,13 @@
-
-
-
 const mongoose = require("mongoose");
 const uuidv1 = require("uuid/v1");
 const crypto = require("crypto");
-const {ObjectId} = mongoose. Schema
+const { ObjectId } = mongoose.Schema;
+const Post = require("./post");
 
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
-        trim: true,  // it removes space
+        trim: true,
         required: true
     },
     email: {
@@ -24,34 +22,25 @@ const userSchema = new mongoose.Schema({
     salt: String,
     created: {
         type: Date,
-        default: Date.now  //no now() because with mongoose we can't
+        default: Date.now
     },
     updated: Date,
     photo: {
         data: Buffer,
-        contentType: String 
-
-        /*populate the photo we will have these
-         two fields one will with the actual data that will
-come in a binary format.*/
+        contentType: String
     },
-    about:{
-        type:String,
+    about: {
+        type: String,
         trim: true
     },
-
-    following: [{type: ObjectId, // part of mongoose
-        ref: "User"}] ,
-    followers: [{type: ObjectId, ref:"User"}]
-// NEED TO UPDATE THE userByID controller method to populate the returned user object with ofllowers & following
-//
-    
+    following: [{ type: ObjectId, ref: "User" }],
+    followers: [{ type: ObjectId, ref: "User" }],
+   
 });
 
 
-// virtual field
 userSchema
-    .virtual("password") // in order to have non peristent data :) and save the password but not in DB 
+    .virtual("password")
     .set(function(password) {
         // create temporary variable called _password
         this._password = password;
@@ -64,13 +53,12 @@ userSchema
         return this._password;
     });
 
-// Encrypted password Method to do the hashing
-
+// methods
 userSchema.methods = {
     authenticate: function(plainText) {
         return this.encryptPassword(plainText) === this.hashed_password;
     },
-// so the user will be authenticated only if his input matches with the hashed password
+
     encryptPassword: function(password) {
         if (!password) return "";
         try {
@@ -83,5 +71,11 @@ userSchema.methods = {
         }
     }
 };
+
+// pre middleware
+userSchema.pre("remove", function(next) {
+    Post.remove({ postedBy: this._id }).exec();
+    next();
+});
 
 module.exports = mongoose.model("User", userSchema);

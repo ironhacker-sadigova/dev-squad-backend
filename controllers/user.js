@@ -1,35 +1,39 @@
-const _ = require("lodash");  //  a JS lib providing methods & functionalities and we always write _
-const User = require("../models/user");
-const formidable = require("formidable");
-const fs = require("fs");
+const _ = require('lodash');
+const User = require('../models/user');
+const formidable = require('formidable');
+const fs = require('fs');
 
 exports.userById = (req, res, next, id) => {
     User.findById(id)
-    // WE NEED TO POPULATE THE ARRAY IN THE FOLLOWING FIELD OF THE USER MODEL 
-    .populate('following', '_id name')
-    .populate('followers', '_id name')
-
-    .exec((err, user) => {
-        if (err || !user) {
-            return res.status(400).json({
-                error: "User not found"
-            });
-        }
-                // if user we append the user object info to the request
-
-        req.profile = user; 
-        next();
-    });
+        // populate followers and following users array
+        .populate('following', '_id name')
+        .populate('followers', '_id name')
+        .exec((err, user) => {
+            if (err || !user) {
+                return res.status(400).json({
+                    error: 'User not found'
+                });
+            }
+            req.profile = user; // adds profile object in req with user info
+            next();
+        });
 };
 
 exports.hasAuthorization = (req, res, next) => {
-    const authorized =
-        req.profile && req.auth && req.profile._id === req.auth._id;
+    let sameUser = req.profile && req.auth && req.profile._id == req.auth._id;
+    let adminUser = req.profile && req.auth && req.auth.role === 'admin';
+
+    const authorized = sameUser || adminUser;
+
+    // console.log("req.profile ", req.profile, " req.auth ", req.auth);
+    // console.log("SAMEUSER", sameUser, "ADMINUSER", adminUser);
+
     if (!authorized) {
         return res.status(403).json({
-            error: "User is not authorized to perform this action"
+            error: 'User is not authorized to perform this action'
         });
     }
+    next();
 };
 
 exports.allUsers = (req, res) => {
@@ -40,11 +44,8 @@ exports.allUsers = (req, res) => {
             });
         }
         res.json(users);
-    }).select("name email updated created");
+    }).select('name email updated created role');
 };
-
-
-// return the profile object from the request url thats enough to show the user
 
 exports.getUser = (req, res) => {
     req.profile.hashed_password = undefined;
@@ -52,70 +53,45 @@ exports.getUser = (req, res) => {
     return res.json(req.profile);
 };
 
+// exports.updateUser = (req, res, next) => {
+//     let user = req.profile;
+//     user = _.extend(user, req.body); // extend - mutate the source object
+//     user.updated = Date.now();
+//     user.save(err => {
+//         if (err) {
+//             return res.status(400).json({
+//                 error: "You are not authorized to perform this action"
+//             });
+//         }
+//         user.hashed_password = undefined;
+//         user.salt = undefined;
+//         res.json({ user });
+//     });
+// };
 
-// USER PROFILE UPDATE METHOD
-
-/*exports.updateUser = (req, res, next) => {
-    let form = new formidable.IncomingForm(); 
+exports.updateUser = (req, res, next) => {
+    let form = new formidable.IncomingForm();
+    // console.log("incoming form data: ", form);
     form.keepExtensions = true;
     form.parse(req, (err, fields, files) => {
         if (err) {
             return res.status(400).json({
-                error: "Photo could not be uploaded"
+                error: 'Photo could not be uploaded'
             });
         }
         // save user
-        let user = req.profile; // first we extract user info 
-        user = _.extend(user, fields);// lodash method extend : it changes the source object (user)
+        let user = req.profile;
+        // console.log("user in update: ", user);
+        user = _.extend(user, fields);
+
         user.updated = Date.now();
+        // console.log("USER FORM DATA UPDATE: ", user);
 
         if (files.photo) {
             user.photo.data = fs.readFileSync(files.photo.path);
             user.photo.contentType = files.photo.type;
         }
 
-    // save the updated user in the DB 
-        user.save((err, result) => {
-            if (err) {
-                return res.status(400).json({
-                    error: err
-                });
-            }
-
-            // in order not to give the properties of password to the front we set it to undefined
-            user.hashed_password = undefined;
-            user.salt = undefined;
-            res.json(user);
-        });
-    });
-};
-
-*/
-
-exports.updateUser = (req, res, next) => {
-    let form = new formidable.IncomingForm(); // will handle the form request 
-    form.keepExtensions = true;// to keep the extension
-    form.parse(req, (err, fields, files) => { // we give 2 argumentd to this method with the data comming & how to handle it with a callback funct
-        if (err) {
-            return res.status(400).json({
-                error: 'Fail to upload your photo'
-            });
-        }
-        // save the user
-        let user = req.profile;
-    
-    user = _.extend(user, fields); // LODASH METHOD :) 
-
-        user.updated = Date.now();
-
-        console.log(user);
-
-        if (files.photo) { // IF THERES IS A PHOTO , WE ADD IT TO THE MODEL PHOTO 
-            user.photo.data = fs.readFileSync(files.photo.path);
-            user.photo.contentType = files.photo.type;
-        }
-// NOW WE SAVE THE USER 
-
         user.save((err, result) => {
             if (err) {
                 return res.status(400).json({
@@ -124,6 +100,7 @@ exports.updateUser = (req, res, next) => {
             }
             user.hashed_password = undefined;
             user.salt = undefined;
+            // console.log("user after update with formdata: ", user);
             res.json(user);
         });
     });
@@ -131,15 +108,11 @@ exports.updateUser = (req, res, next) => {
 
 exports.userPhoto = (req, res, next) => {
     if (req.profile.photo.data) {
-// IF THE CASE MEANS THE USER UPLOADED THEIR PHOTOS 
         res.set(('Content-Type', req.profile.photo.contentType));
         return res.send(req.profile.photo.data);
     }
     next();
 };
-
-// DELETE USER
-
 
 exports.deleteUser = (req, res, next) => {
     let user = req.profile;
@@ -149,12 +122,11 @@ exports.deleteUser = (req, res, next) => {
                 error: err
             });
         }
-        res.json({ message: "User deleted successfully" });
+        res.json({ message: 'User deleted successfully' });
     });
 };
 
-// METHOD FOLLOW AND UNFOLLOW 
-
+// follow unfollow
 exports.addFollowing = (req, res, next) => {
     User.findByIdAndUpdate(req.body.userId, { $push: { following: req.body.followId } }, (err, result) => {
         if (err) {
@@ -165,8 +137,7 @@ exports.addFollowing = (req, res, next) => {
 };
 
 exports.addFollower = (req, res) => {
-    User.findByIdAndUpdate(req.body.followId, { $push: { followers: req.body.userId } }, 
-        { new: true }) // THAT MANGO DB DOESN'T THROW OLD DATA 
+    User.findByIdAndUpdate(req.body.followId, { $push: { followers: req.body.userId } }, { new: true })
         .populate('following', '_id name')
         .populate('followers', '_id name')
         .exec((err, result) => {
@@ -181,17 +152,9 @@ exports.addFollower = (req, res) => {
         });
 };
 
-
-
-// REMOVE FOLLOW AND FOLLIWING METHOD 
-/////////////////////////////////////////
-//SIMILAR TO ADD 
-
-
+// remove follow unfollow
 exports.removeFollowing = (req, res, next) => {
-    User.findByIdAndUpdate(req.body.userId, 
-        { $pull: { following: req.body.unfollowId } },
-         (err, result) => {
+    User.findByIdAndUpdate(req.body.userId, { $pull: { following: req.body.unfollowId } }, (err, result) => {
         if (err) {
             return res.status(400).json({ error: err });
         }
@@ -200,9 +163,7 @@ exports.removeFollowing = (req, res, next) => {
 };
 
 exports.removeFollower = (req, res) => {
-    User.findByIdAndUpdate(req.body.unfollowId,
-         { $pull: { followers: req.body.userId } },
-          { new: true }) // MONGO DB TO SHOW RECENT DATA
+    User.findByIdAndUpdate(req.body.unfollowId, { $pull: { followers: req.body.userId } }, { new: true })
         .populate('following', '_id name')
         .populate('followers', '_id name')
         .exec((err, result) => {
@@ -215,4 +176,17 @@ exports.removeFollower = (req, res) => {
             result.salt = undefined;
             res.json(result);
         });
+};
+
+exports.findPeople = (req, res) => {
+    let following = req.profile.following;
+    following.push(req.profile._id);
+    User.find({ _id: { $nin: following } }, (err, users) => {
+        if (err) {
+            return res.status(400).json({
+                error: err
+            });
+        }
+        res.json(users);
+    }).select('name');
 };
