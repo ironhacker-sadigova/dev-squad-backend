@@ -42,18 +42,14 @@ const userSchema = new mongoose.Schema({
 userSchema
     .virtual("password")
     .set(function(password) {
-        // create temporary variable called _password
         this._password = password;
-        // generate a timestamp
         this.salt = uuidv1();
-        // encryptPassword()
         this.hashed_password = this.encryptPassword(password);
     })
     .get(function() {
         return this._password;
     });
 
-// methods
 userSchema.methods = {
     authenticate: function(plainText) {
         return this.encryptPassword(plainText) === this.hashed_password;
@@ -72,7 +68,6 @@ userSchema.methods = {
     }
 };
 
-// pre middleware
 userSchema.pre("remove", function(next) {
     Post.remove({ postedBy: this._id }).exec();
     next();

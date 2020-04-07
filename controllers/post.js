@@ -20,31 +20,14 @@ exports.postById = (req, res, next, id) => {
         });
 };
 
-/*
-exports.getPosts = (req, res) => {
-    const posts = Post.find()
-        .populate("postedBy", "_id name")
-        .populate("comments", "text created")
-        .populate("comments.postedBy", "_id name")
-        .select("_id title body created likes")
-        .sort({ created: -1 })
-        .then(posts => {
-            res.json(posts);
-        })
-        .catch(err => console.log(err));
-};
-*/
 
-// with pagination
+
 exports.getPosts = async (req, res) => {
-    // get current page from req.query or use default value of 1
     const currentPage = req.query.page || 1;
-    // return 3 posts per page
     const perPage = 6;
     let totalItems;
 
     const posts = await Post.find()
-        // countDocuments() gives you total count of posts
         .countDocuments()
         .then(count => {
             totalItems = count;
@@ -112,8 +95,7 @@ exports.isPoster = (req, res, next) => {
     let sameUser = req.post && req.auth && req.post.postedBy._id == req.auth._id;
     let adminUser = req.post && req.auth && req.auth.role === 'admin';
 
-    // console.log("req.post ", req.post, " req.auth ", req.auth);
-    // console.log("SAMEUSER: ", sameUser, " ADMINUSER: ", adminUser);
+   
 
     let isPoster = sameUser || adminUser;
 
@@ -125,19 +107,7 @@ exports.isPoster = (req, res, next) => {
     next();
 };
 
-// exports.updatePost = (req, res, next) => {
-//     let post = req.post;
-//     post = _.extend(post, req.body);
-//     post.updated = Date.now();
-//     post.save(err => {
-//         if (err) {
-//             return res.status(400).json({
-//                 error: err
-//             });
-//         }
-//         res.json(post);
-//     });
-// };
+
 
 exports.updatePost = (req, res, next) => {
     let form = new formidable.IncomingForm();
@@ -148,7 +118,7 @@ exports.updatePost = (req, res, next) => {
                 error: 'Photo could not be uploaded'
             });
         }
-        // save post
+       
         let post = req.post;
         post = _.extend(post, fields);
         post.updated = Date.now();
@@ -255,31 +225,6 @@ exports.uncomment = (req, res) => {
         });
 };
 
-// exports.updateComment = async (req, res) => {
-//     const comment = req.body.comment;
-//     // const id = req.body.id;
-//     const postId = req.body.postId;
-//     const userId = req.body.userId;
-//     // comment.postedBy = req.body.userId;
-
-//     const result = await Post.findByIdAndUpdate(
-//         postId,
-//         {
-//             $set: {
-//                 comments: {
-//                     _id: comment._id,
-//                     text: comment.text,
-//                     postedBy: userId
-//                 }
-//             }
-//         },
-//         { new: true, overwrite: false }
-//     )
-//         .populate('comments.postedBy', '_id name')
-//         .populate('postedBy', '_id name');
-//     res.json(result);
-// };
-
 exports.updateComment = (req, res) => {
     let comment = req.body.comment;
 
@@ -309,43 +254,3 @@ exports.updateComment = (req, res) => {
     });
 };
 
-/*
-// update commennt by Alaki
-exports.updateComment = async (req, res) => {
-  const commentId = req.body.id;
-  const comment = req.body.comment;
- 
-  const updatedComment = await Post.updateOne(
-    { comments: { $elemMatch: { _id: commentId } } },
-    { $set: { "comments.$.text": comment } }
-  );
-  if (!updatedComment)
-    res.status(404).json({ message: Language.fa.NoPostFound });
- 
-  res.json(updatedComment);
-};
-// update commennt with auth
-exports.updateComment = async (req, res) => {
-  const commentId = req.body.id;
-  const comment = req.body.comment;
-  const postId = req.params.id;
- 
-  const post = await Post.findById(postId);
-  const com = post.comments.map(comment => comment.id).indexOf(commentId);
-  const singleComment = post.comments.splice(com, 1);
-  let authorized = singleComment[0].commentedBy;
-  console.log("Security Check Passed ?", req.auth._id == authorized);
- 
-  if (authorized != req.auth._id)
-    res.status(401).json({ mesage: Language.fa.UnAuthorized });
- 
-  const updatedComment = await Post.updateOne(
-    { comments: { $elemMatch: { _id: commentId } } },
-    { $set: { "comments.$.text": comment } }
-  );
-  if (!updatedComment)
-    res.status(404).json({ message: Language.fr.NoPostFound });
- 
-  res.json({ message: Language.fr.CommentUpdated });
-};
- */
