@@ -158,6 +158,7 @@ exports.photo = (req, res, next) => {
     return res.send(req.post.photo.data);
 };
 
+// ADdS POST TO THE REQUEST SO ONLY NEED TO GRAB THIS FROM THE REQUEST
 exports.singlePost = (req, res) => {
     return res.json(req.post);
 };
